@@ -23,11 +23,24 @@ async function run() {
       .db("easy_drilling")
       .collection("purchases");
     const reviewCollection = client.db("easy_drilling").collection("reviews");
+    const userCollection = client.db("easy_drilling").collection("users");
     //load all data from the database
     app.get("/product", async (req, res) => {
       const query = {};
       const products = await ProductCollection.find(query).toArray();
       res.send(products);
+    });
+    // put
+    app.put("/user/email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     });
     //post
     app.post("/purchase", async (req, res) => {
