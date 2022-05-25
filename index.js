@@ -41,7 +41,12 @@ async function run() {
         $set: user,
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
-      res.send({ result });
+      const token = jwt.sign(
+        { email: email },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "1h" }
+      );
+      res.send({ result, token });
     });
     //post
     app.post("/purchase", async (req, res) => {
@@ -52,6 +57,8 @@ async function run() {
     // get all purchase(order)
     app.get("/purchase", async (req, res) => {
       const query = {};
+      const authorization = req.headers.authorization;
+      console.log(authorization);
       const purchases = await purchaseCollection.find(query).toArray();
       res.send(purchases);
     });
