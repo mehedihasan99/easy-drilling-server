@@ -22,6 +22,7 @@ async function run() {
     const purchaseCollection = client
       .db("easy_drilling")
       .collection("purchases");
+    const reviewCollection = client.db("easy_drilling").collection("reviews");
     //load all data from the database
     app.get("/product", async (req, res) => {
       const query = {};
@@ -33,6 +34,24 @@ async function run() {
       const purchaseProduct = req.body;
       const result = await purchaseCollection.insertOne(purchaseProduct);
       res.send(result);
+    });
+    // get all purchase(order)
+    app.get("/purchase", async (req, res) => {
+      const query = {};
+      const purchases = await purchaseCollection.find(query).toArray();
+      res.send(purchases);
+    });
+    // post :received data from the client and send to database
+    app.post("/review", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+    //load all data from the database
+    app.get("/review", async (req, res) => {
+      const query = {};
+      const reviews = await reviewCollection.find(query).toArray();
+      res.send(reviews);
     });
   } finally {
   }
