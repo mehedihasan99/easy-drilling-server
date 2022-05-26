@@ -42,7 +42,7 @@ async function run() {
     const reviewCollection = client.db("easy_drilling").collection("reviews");
     const userCollection = client.db("easy_drilling").collection("users");
     //load all data from the database
-    app.get("/product", verifyJWT, async (req, res) => {
+    app.get("/product", async (req, res) => {
       const query = {};
       const products = await ProductCollection.find(query).toArray();
       res.send(products);
