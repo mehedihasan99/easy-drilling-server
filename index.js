@@ -6,9 +6,27 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
+const corsConfig = {
+  origin: "*",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+};
+app.use(cors(corsConfig));
+app.options("*", cors(corsConfig));
+app.use(express.json());
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept,authorization"
+  );
+  next();
+});
+
 // middleware
 app.use(cors());
 app.use(express.json());
+
 //
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.4kacx.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -45,7 +63,20 @@ async function run() {
       .db("easy_drilling")
       .collection("newProduct");
     //load all data from the database
-    app.get("/product", async (req, res) => {
+    //
+    // const verifyAdmin = async (req, res, next) => {
+    //   const requester = req.decoded.email;
+    //   const requesterAccount = await userCollection.findOne({
+    //     email: requester,
+    //   });
+    //   if (requesterAccount.role === "admin") {
+    //     next();
+    //   } else {
+    //     res.status(403).send({ message: "forbidden" });
+    //   }
+    // };
+    //
+    app.get("/product", verifyJWT, async (req, res) => {
       const query = {};
       const products = await ProductCollection.find(query).toArray();
       res.send(products);
@@ -132,6 +163,19 @@ async function run() {
       const query = {};
       const reviews = await addProductCollection.find(query).toArray();
       res.send(reviews);
+    });
+    // get all order{purchase}
+    app.get("/order", verifyJWT, async (req, res) => {
+      const query = {};
+      const purchases = await purchaseCollection.find(query).toArray();
+      res.send(purchases);
+    });
+    // delete all order{purchase}
+    app.delete("/order/:email", verifyJWT, async (req, res) => {
+      const email = req.params.customer;
+      const filter = { email: email };
+      const purchases = await purchaseCollection.deleteOne(filter);
+      res.send(purchases);
     });
   } finally {
   }
