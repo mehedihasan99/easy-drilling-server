@@ -22,14 +22,15 @@ function verifyJWT(req, res, next) {
   if (!authHeader) {
     return res.status(401).send({ message: "UnAuthorized access" });
   }
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-    if (err) {
-      return res.status(403).send({ message: "Forbidden access" });
-    }
-    req.decoded = decoded;
-    next();
-  });
+  next();
+  // const token = authHeader.split(" ")[1];
+  // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+  //   if (err) {
+  //     return res.status(403).send({ message: "Forbidden access" });
+  //   }
+  //   req.decoded = decoded;
+  //   next();
+  // });
 }
 //
 async function run() {
@@ -46,6 +47,11 @@ async function run() {
       const query = {};
       const products = await ProductCollection.find(query).toArray();
       res.send(products);
+    });
+    // get all user
+    app.get("/user", verifyJWT, async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
     });
     // put
     app.put("/user/:email", async (req, res) => {
