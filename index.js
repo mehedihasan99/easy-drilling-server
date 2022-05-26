@@ -22,15 +22,14 @@ function verifyJWT(req, res, next) {
   if (!authHeader) {
     return res.status(401).send({ message: "UnAuthorized access" });
   }
-  next();
-  // const token = authHeader.split(" ")[1];
-  // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-  //   if (err) {
-  //     return res.status(403).send({ message: "Forbidden access" });
-  //   }
-  //   req.decoded = decoded;
-  //   next();
-  // });
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    // if (err) {
+    //   return res.status(403).send({ message: "Forbidden access" });
+    // }
+    req.decoded = decoded;
+    next();
+  });
 }
 //
 async function run() {
@@ -56,6 +55,10 @@ async function run() {
     // make admin
     app.put("/user/admin/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({
+        email: requester,
+      });
       const filter = { email: email };
       const updateDoc = {
         $set: { role: "admin" },
