@@ -41,6 +41,9 @@ async function run() {
       .collection("purchases");
     const reviewCollection = client.db("easy_drilling").collection("reviews");
     const userCollection = client.db("easy_drilling").collection("users");
+    const addProductCollection = client
+      .db("easy_drilling")
+      .collection("newProduct");
     //load all data from the database
     app.get("/product", async (req, res) => {
       const query = {};
@@ -116,6 +119,18 @@ async function run() {
     app.get("/review", verifyJWT, async (req, res) => {
       const query = {};
       const reviews = await reviewCollection.find(query).toArray();
+      res.send(reviews);
+    });
+    // post :received data from the client and send to database
+    app.post("/addProduct", async (req, res) => {
+      const newProduct = req.body;
+      const result = await addProductCollection.insertOne(newProduct);
+      res.send(result);
+    });
+    //load all data from the database
+    app.get("/addProduct", async (req, res) => {
+      const query = {};
+      const reviews = await addProductCollection.find(query).toArray();
       res.send(reviews);
     });
   } finally {
